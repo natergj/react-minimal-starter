@@ -8,5 +8,5 @@ module.exports = {
   ],
   // the "@babel/plugin-transform-runtime" plugin tells Babel to
   // require the runtime instead of inlining it.
-  plugins: ["@babel/plugin-transform-runtime"]
+  plugins: ["@babel/plugin-transform-runtime", "@babel/plugin-proposal-class-properties"]
 }

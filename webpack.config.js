@@ -10,7 +10,7 @@ module.exports = {
   resolve: {
     // explicitly tell webpack to look for files with .jsx extension
     // (React file naming convention)
-    extensions: [".js", ".jsx"]
+    extensions: [".js", ".jsx", ".mjs"]
   },
   // React needs an HTML node to render into
   plugins: [new HtmlWebpackPlugin({
@@ -27,7 +27,13 @@ module.exports = {
           // the babel-loader is used to transpile source to native javascript code
           loader: "babel-loader",
         }
+      },
+      {
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto'
       }
     ]
-  }
+  },
+  devtool: "source-map"
 };
