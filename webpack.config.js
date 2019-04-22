@@ -2,7 +2,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  entry: path.resolve(__dirname, "src/index.jsx"),
+  entry: path.resolve(__dirname, "src/index.tsx"),
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "[name].bundle.js"
@@ -10,7 +10,7 @@ module.exports = {
   resolve: {
     // explicitly tell webpack to look for files with .jsx extension
     // (React file naming convention)
-    extensions: [".js", ".jsx"]
+    extensions: [".js", ".jsx", ".ts", ".tsx"]
   },
   // React needs an HTML node to render into
   plugins: [new HtmlWebpackPlugin({
@@ -20,7 +20,7 @@ module.exports = {
     rules: [
       {
         // transpile both .js and .jsx files with babel
-        test: /\.(jsx?)$/,
+        test: /\.(tsx?|jsx?)$/,
         // do not transpile code in node_modules
         exclude: /node_modules/,
         use: {
@@ -29,5 +29,6 @@ module.exports = {
         }
       }
     ]
-  }
+  },
+  devtool: "source-map",
 };

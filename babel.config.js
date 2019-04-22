@@ -4,7 +4,8 @@ module.exports = {
     // supported by 99.5% of in use browsers
     "@babel/preset-env", 
     // the "@babel/preset-react" preset transpiles jsx code to javascript
-    "@babel/preset-react"
+    "@babel/preset-react",
+    ["@babel/preset-typescript", { isTSX: true, allExtensions: true }]
   ],
   // the "@babel/plugin-transform-runtime" plugin tells Babel to
   // require the runtime instead of inlining it.
