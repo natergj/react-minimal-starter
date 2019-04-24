@@ -1,8 +1,12 @@
 import * as React from "react";
 import useReactRouter from "use-react-router";
 import { AddCircle, Delete } from "@material-ui/icons";
-import { RECIPE_EDITOR_QUERY } from "../graphql/queries";
-import { useQuery } from "react-apollo-hooks";
+import {
+  RECIPE_EDITOR_QUERY,
+  SET_RECIPE_TITLE,
+  MODIFIY_INGREDIENT
+} from "../graphql/queries";
+import { useMutation, useQuery } from "react-apollo-hooks";
 import {
   TextField,
   makeStyles,
@@ -23,48 +27,48 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const RecipeEditor: React.FunctionComponent<{}> = () => {
   const classes = useStyles();
-  const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [instructions, setInstructions] = React.useState("");
-  const [ingredients, setIngredients] = React.useState([]);
   const { match } = useReactRouter<{ recipeId: string }>();
 
+  const setTitle = useMutation(SET_RECIPE_TITLE);
+  const setIngredient = useMutation(MODIFIY_INGREDIENT);
   const { data, loading } = useQuery(RECIPE_EDITOR_QUERY, {
     variables: { id: match.params.recipeId }
   });
 
   React.useEffect(() => {
     if (data.recipeEditorById) {
-      const {
-        title,
-        description,
-        instructions,
-        ingredients
-      } = data.recipeEditorById;
-      setTitle(title);
-      setDescription(description);
-      setInstructions(instructions);
-      setIngredients(ingredients);
+      const { description, instructions } = data.recipeEditorById;
+      setDescription(description || "");
+      setInstructions(instructions || "");
     }
   }, [data]);
 
   const updateIngredient = (index, property, e) => {
-    const nextIngredients = [...ingredients];
-    const updatedIngredient = { ...ingredients[index] };
+    if (!data.recipeEditorById) return;
+    const updatedIngredient = data.recipeEditorById.ingredients[index];
     updatedIngredient[property] = e.target.value;
-    nextIngredients.splice(index, 1, updatedIngredient);
-    setIngredients(nextIngredients);
+    setIngredient({
+      variables: {
+        recipeId: match.params.recipeId,
+        ingredientIndex: index,
+        modifications: {
+          amount: Number(updatedIngredient.amount),
+          measure: updatedIngredient.measure,
+          ingredient: updatedIngredient.ingredient
+        }
+      }
+    });
   };
 
   const addIngredient = () => {
-    setIngredients([...ingredients, { measure: "", amount: "", ingredient: "" }])
-  }
+    console.log("add ingredient");
+  };
 
-  const deleteIngredient = (index) => {
-    const nextIngredients = [...ingredients];
-    nextIngredients.splice(index, 1);
-    setIngredients(nextIngredients);
-  }
+  const deleteIngredient = index => {
+    console.log("remove ingredient");
+  };
 
   if (loading) return <div>Loading</div>;
   return (
@@ -74,8 +78,15 @@ const RecipeEditor: React.FunctionComponent<{}> = () => {
         fullWidth={true}
         variant="outlined"
         label="Title"
-        value={title}
-        onChange={e => setTitle(e.target.value)}
+        value={data.recipeEditorById.title || ""}
+        onChange={e =>
+          setTitle({
+            variables: {
+              recipeId: match.params.recipeId,
+              title: e.target.value
+            }
+          })
+        }
       />
       <TextField
         classes={{ root: classes.textFieldRoot }}
@@ -98,48 +109,51 @@ const RecipeEditor: React.FunctionComponent<{}> = () => {
         onChange={e => setInstructions(e.target.value)}
       />
       <List style={{ borderSpacing: "16px" }}>
-        {ingredients.map(({ ingredient, amount, measure }, index) => {
-          return (
-            <ListItem key={index} style={{ display: "table-row" }}>
-              <TextField
-                value={amount}
-                label="Amount"
-                style={{ display: "table-cell" }}
-                onChange={updateIngredient.bind(null, index, "amount")}
-              >
-                {amount}
-              </TextField>
-              <Select
-                value={measure}
-                style={{ display: "table-cell" }}
-                onChange={updateIngredient.bind(null, index, "measure")}
-              >
-                <MenuItem value="cup">Cup</MenuItem>
-                <MenuItem value="teaspoon">Teaspoon</MenuItem>
-                <MenuItem value="tablespoon">Tablespoon</MenuItem>
-                <MenuItem value="ounce">Ounce</MenuItem>
-                <MenuItem value="fluid_once">Fluid Ounce</MenuItem>
-                <MenuItem value="gram">Gram</MenuItem>
-                <MenuItem value="pound">Pound</MenuItem>
-              </Select>
-              <TextField
-                value={ingredient}
-                label="Ingredient"
-                style={{ display: "table-cell" }}
-                onChange={updateIngredient.bind(null, index, "ingredient")}
-              >
-                {ingredient}
-              </TextField>
-              <IconButton onClick={deleteIngredient.bind(null, index)}>
-                <Delete />
-              </IconButton>
-            </ListItem>
-          );
-        })}
+        {data.recipeEditorById.ingredients.map(
+          ({ ingredient, amount, measure }, index) => {
+            return (
+              <ListItem key={index} style={{ display: "table-row" }}>
+                <TextField
+                  value={amount}
+                  label="Amount"
+                  style={{ display: "table-cell" }}
+                  onChange={updateIngredient.bind(null, index, "amount")}
+                >
+                  {amount}
+                </TextField>
+                <Select
+                  value={measure}
+                  style={{ display: "table-cell" }}
+                  onChange={updateIngredient.bind(null, index, "measure")}
+                >
+                  <MenuItem value="cup">Cup</MenuItem>
+                  <MenuItem value="teaspoon">Teaspoon</MenuItem>
+                  <MenuItem value="tablespoon">Tablespoon</MenuItem>
+                  <MenuItem value="ounce">Ounce</MenuItem>
+                  <MenuItem value="fluid_once">Fluid Ounce</MenuItem>
+                  <MenuItem value="gram">Gram</MenuItem>
+                  <MenuItem value="pound">Pound</MenuItem>
+                </Select>
+                <TextField
+                  value={ingredient}
+                  label="Ingredient"
+                  style={{ display: "table-cell" }}
+                  onChange={updateIngredient.bind(null, index, "ingredient")}
+                >
+                  {ingredient}
+                </TextField>
+                <IconButton onClick={deleteIngredient.bind(null, index)}>
+                  <Delete />
+                </IconButton>
+              </ListItem>
+            );
+          }
+        )}
         <ListItem>
-          <IconButton onClick={addIngredient} >
+          <IconButton onClick={addIngredient}>
             <AddCircle />
-          </IconButton> Add Ingredient
+          </IconButton>{" "}
+          Add Ingredient
         </ListItem>
       </List>
       <div style={{ alignSelf: "flex-end" }}>

@@ -2,7 +2,7 @@ import { RECIPE_DETAILS_QUERY } from "./queries";
 
 export default {
   Ingredient: {
-    completed(ingredient, vars, ctx) {
+    completed(ingredient) {
       return typeof ingredient.completed === "boolean"
         ? ingredient.completed
         : false;
@@ -24,10 +24,18 @@ export default {
 
   Mutation: {
     completeIngredient(_, vars, ctx) {
-      ctx.writeData({
+      ctx.client.writeData({
         id: `Recipe:${vars.recipeId}.ingredients.${vars.ingredientIndex}`,
         data: {
           completed: vars.completed
+        }
+      });
+    },
+    setRecipeTitle(_, vars, ctx) {
+      ctx.client.writeData({
+        id: `RecipeForm:${vars.recipeId}`,
+        data: {
+          title: vars.title
         }
       });
     }

@@ -2,6 +2,7 @@ import gql from "graphql-tag";
 
 export default gql`
   extend type Query {
+    """ get the form data for a specific recipe by ID """
     recipeEditorById(id: ID!): RecipeForm
   }
 
@@ -11,6 +12,7 @@ export default gql`
       ingredientIndex: Int
       completed: Boolean
     ): Boolean
+    setRecipeTitle(recipeId: ID! title: String): Boolean
   }
 
   extend type Ingredient {

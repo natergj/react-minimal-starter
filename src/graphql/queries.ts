@@ -40,7 +40,7 @@ export const RECIPE_EDITOR_QUERY = gql`
       }
     }
   }
-`
+`;
 
 export const COMPLETE_INGREDIENT = gql`
   mutation completeIngredient(
@@ -53,5 +53,36 @@ export const COMPLETE_INGREDIENT = gql`
       ingredientIndex: $ingredientIndex
       completed: $completed
     ) @client
+  }
+`;
+
+export const SET_RECIPE_TITLE = gql`
+  mutation setRecipeTitle($recipeId: ID!, $title: String!) {
+    setRecipeTitle(recipeId: $recipeId, title: $title) @client
+  }
+`;
+
+export const MODIFIY_INGREDIENT = gql`
+  mutation modifyIngredient(
+    $recipeId: ID!
+    $ingredientIndex: Int
+    $modifications: IngredientInput
+  ) {
+    modifyIngredient(
+      recipeId: $recipeId
+      ingredientIndex: $ingredientIndex
+      modifications: $modifications
+    ) {
+      id
+      title
+      description
+      instructions
+      ingredients {
+        completed @client
+        measure
+        amount
+        ingredient
+      }
+    }
   }
 `;

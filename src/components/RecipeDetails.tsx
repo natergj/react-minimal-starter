@@ -7,7 +7,9 @@ import {
   ListItem,
   makeStyles,
   Theme,
+  IconButton,
 } from "@material-ui/core";
+import { Edit } from "@material-ui/icons";
 import Amount from "./Amount";
 import { RECIPE_DETAILS_QUERY, COMPLETE_INGREDIENT } from "../graphql/queries";
 
@@ -23,7 +25,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const RecipeDetails: React.FunctionComponent<{}> = () => {
-  const { match } = useRouter<{ recipeId: string }>();
+  const { match, history } = useRouter<{ recipeId: string }>();
   const { data, loading, error } = useQuery(RECIPE_DETAILS_QUERY, {
     variables: { id: match.params.recipeId }
   });
@@ -33,11 +35,14 @@ const RecipeDetails: React.FunctionComponent<{}> = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error</div>;
-  const { title, instructions, description, ingredients } = data.recipeById;
+  const { id, title, instructions, description, ingredients } = data.recipeById;
   return (
     <div>
       <Typography variant="h2" component="header">
         {title}
+        <IconButton onClick={() => history.push(`/edit/${id}`)}>
+          <Edit />
+        </IconButton>
       </Typography>
       <Typography variant="subtitle1" component="p">
         {description}
